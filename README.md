@@ -6,7 +6,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-> **2025 數位發展部 防災積木元件創新賽 參賽作品**
+> **2026 數位發展部 防災積木元件創新賽 參賽作品**
 
 https://github.com/user-attachments/assets/c6268f6b-4df0-4631-8ffb-10d0697c7400
 
