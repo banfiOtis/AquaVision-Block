@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: AquaVision Block API
+  description: |
+    防災積木元件創新賽 - 參賽作品元件規格書。
+    本元件（AquaVision Block）專為 2025 年 9 月花蓮馬太鞍溪堰塞湖災害事件情境設計，
+    旨在將前線非結構化的通報影像與 GPS 數據，透過多模態 AI 與邊緣端 OCR 預處理，
+    轉譯為標準化、機器可讀的 JSON 與 GeoJSON 格式，供下游災防決策系統與地圖看板直接讀取使用。
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000/api/v1
+    description: 本地開發與 Demo 測試伺服器
+paths:
+  /analyze:
+    post:
+      summary: 解析災情通報影像與特徵
+      description: 接收來自 LINE Bot、iOS Client 或 Web 通報端送入的影像 URL、GPS 座標及邊緣端預讀文字，運用 AI 進行多模態水情與風險結構化解析。
+      operationId: analyzeImageReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AquaVisionInput'
+      responses:
+        '200':
+          description: 解析成功，回傳結構化防災數據與標準 GeoJSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AquaVisionOutput'
+        '400':
+          description: 請求格式錯誤（例如缺少必要欄位或經緯度格式不正確）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: 後端 AI 服務異常或影像下載解析失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+components:
+  schemas:
+    AquaVisionInput:
+      type: object
+      required:
+        - event_id
+        - image_url
+        - location
+      properties:
+        event_id:
+          type: string
+          example: "mataian_202509"
+          description: 災害事件識別碼（此處固定或聚焦於馬太鞍溪堰塞湖事件）
+        image_url:
+          type: string
+          format: uri
+          example: "https://example.com/uploads/lake_status_001.jpg"
+          description: 前線人員拍攝並上傳的現場災情影像公開/暫存 URL
+        location:
+          type: object
+          required:
+            - latitude
+            - longitude
+          properties:
+            latitude:
+              type: number
+              format: float
+              example: 23.654321
+              description: 通報點緯度 (WGS84)
+            longitude:
+              type: number
+              format: float
+              example: 121.432109
+              description: 通報點經度 (WGS84)
+        edge_ocr_text:
+          type: string
+          example: "台電電桿 馬太 045 水位 15M"
+          description: 前端設備（如 iOS Vision Framework）在本地端預先識別提取的文字內容，可供雲端 AI 交叉驗證
+
+    AquaVisionOutput:
+      type: object
+      required:
+        - status
+        - timestamp
+        - analysis_result
+        - standardized_geojson
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+          example: "success"
+          description: 處理狀態
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-24T21:55:00Z"
+          description: API 處理完成的時間戳記
+        analysis_result:
+          type: object
+          required:
+            - turbidity_level
+            - barrier_risk
+            - confidence_score
+            - requires_human_review
+          properties:
+            turbidity_level:
+              type: string
+              enum: [low, medium, high]
+              example: "high"
+              description: 水體混濁度評級（low: 清澈/正常, medium: 略顯混濁, high: 嚴重混濁/黃泥流）
+            barrier_risk:
+              type: string
+              enum: [safe, warning, critical]
+              example: "warning"
+              description: 堰塞湖壩體與崩塌潛勢風險評估（safe: 穩定, warning: 疑似滲漏/需密切注意, critical: 立即潰決危險）
+            confidence_score:
+              type: number
+              format: float
+              minimum: 0.0
+              maximum: 1.0
+              example: 0.85
+              description: AI 對此多模態影像分析結果的綜合信賴度分數
+            requires_human_review:
+              type: boolean
+              example: false
+              description: 是否需要人工二度介入複核（當 confidence_score 低於閾值時將自動標記為 true）
+            extracted_features:
+              type: array
+              items:
+                type: string
+              example: ["發現黃褐色泥流", "周邊邊坡有小規模滑動跡象", "水尺刻度接近警戒線"]
+              description: AI 從影像中識別出的具體環境與水利語意特徵列表
+        standardized_geojson:
+          type: object
+          required:
+            - type
+            - geometry
+            - properties
+          description: 符合 RFC 7946 規範的標準 GeoJSON Feature 物件，方便 GIS 系統與地理資訊看板直接載入
+          properties:
+            type:
+              type: string
+              enum: [Feature]
+              example: "Feature"
+            geometry:
+              type: object
+              required:
+                - type
+                - coordinates
+              properties:
+                type:
+                  type: string
+                  enum: [Point]
+                  example: "Point"
+                coordinates:
+                  type: array
+                  minItems: 2
+                  maxItems: 2
+                  items:
+                    type: number
+                  example: [121.432109, 23.654321]
+                  description: 經緯度陣列，格式為 [經度, 緯度]
+            properties:
+              type: object
+              required:
+                - urgency
+                - primary_tag
+              properties:
+                urgency:
+                  type: string
+                  enum: [low, medium, high, critical]
+                  example: "high"
+                  description: 綜合評定之災情緊急程度
+                primary_tag:
+                  type: string
+                  example: "堰塞湖高濁度"
+                  description: 主要防災分類標籤
+                display_title:
+                  type: string
+                  example: "馬太鞍溪堰塞湖影像通報 - 濁度高"
+                  description: 用於地圖彈出視窗顯示的標題
+
+    APIError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INVALID_IMAGE_URL"
+          description: 錯誤識別碼
+        message:
+          type: string
+          example: "無法下載指定的通報影像，請檢查 URL 是否有效。"
+          description: 詳細錯誤訊息說明
