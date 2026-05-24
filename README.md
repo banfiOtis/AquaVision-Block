@@ -8,8 +8,7 @@
 
 > **2025 數位發展部 防災積木元件創新賽 參賽作品**
 
-![Demo](https://github.com/user-attachments/assets/c6268f6b-4df0-4631-8ffb-10d0697c7400)
-
+https://github.com/user-attachments/assets/c6268f6b-4df0-4631-8ffb-10d0697c7400
 
 ## 📌 元件基本資訊
 * **元件實作型態：** API 服務型元件 (Service Component)
