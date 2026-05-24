@@ -1,6 +1,16 @@
 
 # AquaVision Block (水情視覺解析元件)
 
+![iOS](https://img.shields.io/badge/iOS-16.0+-black?logo=apple)
+![SwiftUI](https://img.shields.io/badge/SwiftUI-Edge_OCR-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+> **2025 數位發展部 防災積木元件創新賽 參賽作品**
+
+![Demo](https://github.com/user-attachments/assets/c6268f6b-4df0-4631-8ffb-10d0697c7400)
+
+
 ## 📌 元件基本資訊
 * **元件實作型態：** API 服務型元件 (Service Component)
 * **聚焦災情情境：** 2025 年 9 月花蓮馬太鞍溪堰塞湖災害事件
