@@ -23,8 +23,6 @@ struct AquaVisionInput: Codable {
 }
 
 class AquaVisionClient {
-    
-    // 如果用 iOS 模擬器測試，127.0.0.1 沒問題。如果用 iPhone 實機測試，請改成 Mac 的 Wi-Fi IP (例如 http://192.168.1.xxx:8000/api/v1/analyze)
     let apiUrl = URL(string: "http://127.0.0.1:8000/api/v1/analyze")!
     
     // MARK: - 2. 實作 Vision Framework 邊緣端 OCR
