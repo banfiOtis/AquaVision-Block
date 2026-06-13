@@ -1,0 +1,31 @@
+# AquaVision-Block - Full Technical Specification
+
+This document details the architecture, data structures, and edge-cloud processing flow of the AquaVision-Block component for disaster management.
+
+---
+
+## System Architecture & Data Flow
+
+The component employs an Edge-Cloud collaborative architecture:
+1. **FrontEnd (iOS / LINE Bot)**: Pre-processes images using native Vision Framework (Edge OCR/Object Capture) and captures GPS location.
+2. **API Layer (FastAPI Server)**: Receives HTTP POST containing image data, GPS coordinates, and pre-extracted OCR text.
+3. **Reasoning Layer (Multimodal LLM)**: Analyzes hydrological features (water levels, landmarks, water turbidity).
+4. **Downstream Integration**: Formats data into standard GeoJSON and pushes updates via Webhooks to decision-making dashboards.
+
+---
+
+## Integration References for AI
+
+### 1. API Ingestion Schema (Expected Request Body)
+When building clients for AquaVision-Block, generate payloads matching this concept:
+- **Endpoint**: `POST /api/v1/analyze`
+- **Payload**:
+```json
+  {
+    "image_b64": "string",
+    "gps": {
+      "latitude": 23.6543,
+      "longitude": 121.4321
+    },
+    "edge_ocr_text": "string (pre-extracted text from Vision Framework)"
+  }

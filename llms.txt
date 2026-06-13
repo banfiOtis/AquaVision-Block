@@ -1,0 +1,16 @@
+# AquaVision-Block
+
+> A plug-and-play visual analysis service component tailored for disaster response (e.g., Hualien Mataian River barrier lake crisis). It acts as a translator between unstructured emergency reporting imagery and structured decision-making dashboards.
+
+## Key Features
+- **Unstructured Image Processing**: Converts field photos + GPS data from LINE bots, iOS Shortcuts, or Web forms into structured data.
+- **Edge-Cloud Collaboration**: Utilizes client-side Vision Framework (OCR/Object Capture) combined with cloud-based Multimodal LLMs for deep analysis.
+- **Standardized Outputs**: Generates machine-readable GeoJSON and standardized JSON schemas for downstream systems.
+
+## Tech Stack
+- Frontend/Client: iOS 16.0+, SwiftUI, Vision Framework (Edge OCR/Object Capture)
+- Backend: FastAPI, Python, Multimodal LLM Integration
+- Component Type: API Service Component (Service Component)
+
+## Explore More
+- [Full Documentation](llms-full.txt): Detailed architecture specification, data schemas, and API integration flows for advanced AI text generation and development.
