@@ -17,9 +17,10 @@ struct Location: Codable {
 
 struct AquaVisionInput: Codable {
     let event_id: String
-    let image_url: String
+    let image_url: String?      // 改為 Optional，因為我們現在直接傳照片了
     let location: Location
     let edge_ocr_text: String?
+    let image_base64: String?   // 🌟 新增：用來傳送實體照片的 Base64 欄位
 }
 
 class AquaVisionClient {
@@ -66,11 +67,22 @@ class AquaVisionClient {
     // MARK: - 3. 發送報告至 Python 後端 API
     func submitDisasterReport(image: UIImage, eventId: String, imageUrl: String, location: Location, ocrText: String) async throws -> String {
         
+        // 🌟 步驟 A：將圖片縮小並轉成 Base64
+        guard let resizedImage = image.resized(toWidth: 800),
+              let base64String = resizedImage.toBase64(compressionQuality: 0.7) else {
+            throw NSError(domain: "ImageError", code: 1, userInfo: [NSLocalizedDescriptionKey: "圖片轉換 Base64 失敗"])
+        }
+        
+        // 🌟 步驟 B：加上大模型需要的 MIME Type 前綴
+        let imageBase64WithPrefix = "data:image/jpeg;base64,\(base64String)"
+        
+        // 🌟 步驟 C：組合新的 Payload
         let payload = AquaVisionInput(
             event_id: eventId,
             image_url: imageUrl,
             location: location,
-            edge_ocr_text: ocrText.isEmpty ? nil : ocrText
+            edge_ocr_text: ocrText.isEmpty ? nil : ocrText,
+            image_base64: imageBase64WithPrefix // 將照片放進 JSON
         )
         
         var request = URLRequest(url: apiUrl)
@@ -88,5 +100,23 @@ class AquaVisionClient {
         } else {
             return "❌ 請求失敗，狀態碼：\(httpResponse.statusCode)"
         }
+    }
+}
+
+// MARK: - 4. UIImage 擴充功能 (壓縮與轉 Base64)
+extension UIImage {
+    // 等比例縮放圖片 (避免 JSON 檔案過大)
+    func resized(toWidth width: CGFloat) -> UIImage? {
+        let canvasSize = CGSize(width: width, height: CGFloat(ceil(width/size.width * size.height)))
+        UIGraphicsBeginImageContextWithOptions(canvasSize, false, scale)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: CGRect(origin: .zero, size: canvasSize))
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
+    
+    // 轉為 Base64 字串
+    func toBase64(compressionQuality: CGFloat = 0.7) -> String? {
+        guard let imageData = self.jpegData(compressionQuality: compressionQuality) else { return nil }
+        return imageData.base64EncodedString()
     }
 }

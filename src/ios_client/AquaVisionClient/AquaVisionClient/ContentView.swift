@@ -123,8 +123,16 @@ struct ContentView: View {
                 let text = try await visionClient.extractTextFromImage(image: image)
                 ocrResultText = text.isEmpty ? "未辨識到文字" : text
                 
-                // 2. 假造一組災情地點的座標 (馬太鞍溪附近)
-                let mockLocation = Location(latitude: 23.6543, longitude: 121.4321)
+                // 2. 隨機生成馬太鞍溪附近的座標 (讓戰情地圖點位更真實散佈)
+                // 基準點：馬太鞍濕地周邊
+                let baseLat = 23.6543
+                let baseLon = 121.4321
+
+                // 隨機偏移量：大約 -0.015 到 +0.015 度 (約半徑 1.5 公里內隨機散佈)
+                let randomLat = baseLat + Double.random(in: -0.015...0.015)
+                let randomLon = baseLon + Double.random(in: -0.015...0.015)
+
+                let mockLocation = Location(latitude: randomLat, longitude: randomLon)
                 
                 // 3. 呼叫 API 送出資料 (假設你用本機測試)
                 // 注意：實機測試時，請將 AquaVisionClient 裡的 localhost 改為你 Mac 的 IP 網址
