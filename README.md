@@ -9,7 +9,10 @@
 
 > **2026 數位發展部 防災積木元件創新賽 參賽作品**
 
-https://github.com/user-attachments/assets/c6268f6b-4df0-4631-8ffb-10d0697c7400
+
+https://github.com/user-attachments/assets/f072aa51-92df-4b7c-8bf5-b272e44d8aa8
+
+
 
 ## 📌 元件基本資訊
 * **元件實作型態：** API 服務型元件 (Service Component) + 視覺化戰情模組
